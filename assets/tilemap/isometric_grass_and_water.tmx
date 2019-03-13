@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.1" orientation="isometric" renderorder="right-down" width="30" height="40" tilewidth="64" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="2">
+ <tileset firstgid="1" name="isometric_grass_and_water" tilewidth="64" tileheight="64" tilecount="24" columns="4">
+  <tileoffset x="0" y="16"/>
+  <grid orientation="isometric" width="64" height="32"/>
+  <image source="isometric_grass_and_water.png" width="256" height="384"/>
+  <terraintypes>
+   <terrain name="Grass" tile="0"/>
+   <terrain name="Water" tile="22"/>
+  </terraintypes>
+  <tile id="0" terrain="0,0,0,0"/>
+  <tile id="1" terrain="0,0,0,0"/>
+  <tile id="2" terrain="0,0,0,0"/>
+  <tile id="3" terrain="0,0,0,0"/>
+  <tile id="4" terrain="0,0,0,1"/>
+  <tile id="5" terrain="0,0,1,0"/>
+  <tile id="6" terrain="1,0,0,0"/>
+  <tile id="7" terrain="0,1,0,0"/>
+  <tile id="8" terrain="0,1,1,1"/>
+  <tile id="9" terrain="1,0,1,1"/>
+  <tile id="10" terrain="1,1,1,0"/>
+  <tile id="11" terrain="1,1,0,1"/>
+  <tile id="12" terrain="0,0,1,1"/>
+  <tile id="13" terrain="1,0,1,0"/>
+  <tile id="14" terrain="1,1,0,0"/>
+  <tile id="15" terrain="0,1,0,1"/>
+  <tile id="16" terrain="0,0,1,1"/>
+  <tile id="17" terrain="1,0,1,0"/>
+  <tile id="18" terrain="1,1,0,0"/>
+  <tile id="19" terrain="0,1,0,1"/>
+  <tile id="20" terrain="0,1,1,0"/>
+  <tile id="21" terrain="1,0,0,1"/>
+  <tile id="22" terrain="1,1,1,1"/>
+  <tile id="23" terrain="1,1,1,1"/>
+  <wangsets>
+   <wangset name="Grass and Water" tile="15">
+    <wangcornercolor name="Grass" color="#8ab022" tile="0" probability="1"/>
+    <wangcornercolor name="Water" color="#378dc2" tile="23" probability="1"/>
+    <wangtile tileid="0" wangid="0x10101010"/>
+    <wangtile tileid="1" wangid="0x10101010"/>
+    <wangtile tileid="2" wangid="0x10101010"/>
+    <wangtile tileid="3" wangid="0x10101010"/>
+    <wangtile tileid="4" wangid="0x10102010"/>
+    <wangtile tileid="5" wangid="0x10201010"/>
+    <wangtile tileid="6" wangid="0x20101010"/>
+    <wangtile tileid="7" wangid="0x10101020"/>
+    <wangtile tileid="8" wangid="0x10202020"/>
+    <wangtile tileid="9" wangid="0x20202010"/>
+    <wangtile tileid="10" wangid="0x20201020"/>
+    <wangtile tileid="11" wangid="0x20102020"/>
+    <wangtile tileid="12" wangid="0x10202010"/>
+    <wangtile tileid="13" wangid="0x20201010"/>
+    <wangtile tileid="14" wangid="0x20101020"/>
+    <wangtile tileid="15" wangid="0x10102020"/>
+    <wangtile tileid="16" wangid="0x10202010"/>
+    <wangtile tileid="17" wangid="0x20201010"/>
+    <wangtile tileid="18" wangid="0x20101020"/>
+    <wangtile tileid="19" wangid="0x10102020"/>
+    <wangtile tileid="20" wangid="0x10201020"/>
+    <wangtile tileid="21" wangid="0x20102010"/>
+    <wangtile tileid="22" wangid="0x20202020"/>
+    <wangtile tileid="23" wangid="0x20202020"/>
+   </wangset>
+  </wangsets>
+ </tileset>
+ <layer id="15" name="layer1" width="30" height="40" offsetx="-0.9697" offsety="-4">
+  <data encoding="base64" compression="zlib">
+   eJx9ltlyKjEMRD0LYUlYAoTw/196TZVU98xBkwfVbLbUarXkObbW9t2eYdduc7cp7N7tt9tnt223XbcvPW9jzxDXS3y/xbc7ns9xvYWfJ3y99o9hl4h7iuch/JyAbYjrptt3t59uj24fwH4KTGOs20S+v5Fr+sg1md81nqfAcuh2DN8D1jLHK9YT5w4xPwNj+pr/iJPcE2vyQwzJXd6nv41qd4GvCevuqMMjsH5GrbbIIzn8Dnx5f8T1I+Lk3lk8TW2pLcekljaIs9fa1GvifET9R3BKvvgua7XD3iPy+AFf2RPJ3RMcpk7NZ8Yb2pK3F+7UI3XIHmD/PNpSN+SU2na+2RvkLbnPWpyR+7fyzrp8RYwBPlPbWZusZeJgXbdtyUH6SD/kMrHlTCEuYnvl417cxPMevhh3bMse42wa2nKOkO9b+6+NJ+yAeOyvub33Z2LYaQ3nTuqQ/ZZ14pwkLq5lHMc1F7Pecf6Yrx3iX7WG8TyPeX5QFzwjZjwPxfrUyAF15vr0ORb3jOHvYxHXcyLz5lz4aEsdmUdyMLd3LFzD7xU2npevGmevzcV+xuSz597YlhzOxbecZTzHT+0dKzVg3Vl/jmvt5Dx+1TnPkOx1zwzmz/c05ky+rc3Ud/6PnBWT+x2fNWDsKh4xrfUeNTMWe/itquPY/tYEe8r5WSfW5qi9zJfvyZc5c12Io+Kg4nmSVb1Insw39THIp/lc46Xilf7Xes9zgrgH3Rsb8VjjfG8sfO/6M5atqrvrNcmvNUMu6bfSNLFO7b1G5NLnQ5Vv1Rvk3bWr/hX47PtK72t7qhlrbNb+2ppRPj0HK+zm1Xl4JlT95p6intf063+A6t/D/w2eif5fqOZKxVk1G6re+2uWVDqucneNfV999/k3yW9Vt0on7jFjqDRgDqtZbA7MnetbzXifL9ZIVYsq92o+V+enNe2aur/WZrvnpLVXnQuuY9W73F/1ffXf4J6q+HX/u26ei2sxzblntM/QqifdU2tzoXrvM8K69pU8/QM9/Bhh
+  </data>
+ </layer>
+</map>
