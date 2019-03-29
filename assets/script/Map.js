@@ -15,7 +15,7 @@ cc.Class({
             type: cc.Sprite,
         },
         playerTile: {
-            default: new cc.Vec2(),
+            default: cc.v2(0, 0),
             tooltip: "角色初始位置（tile坐标)",
         },
         atlas: {
@@ -41,68 +41,28 @@ cc.Class({
         // 初始化变量
         this.timeMoving = 0;
         this.posTouchStart = undefined;
-        // this.keyUpPressed = false;
-        // this.keyDownPressed = false;
-        // this.keyLeftPressed = false;
-        // this.keyRightPressed = false;
         this.player.spriteFrame = this.atlas.getSpriteFrame('run_1');
         this.nodeMainCamera = this.node.getChildByName('Main Camera');
         this.nodeMoveArea = this.node.getChildByName('Move Area');
         this.visibleSize = cc.view.getVisibleSize();
         this.canvasSize = this.node.getComponent(cc.Canvas).designResolution;
+        this.deltaH = (this.visibleSize.height - this.canvasSize.height) * 0.5; //屏幕高度与画布高度之差的一半
+        this.posTileTop = this.getPosTileTop();
+        this.playerTile = this.convertPosTile2Vis(this.playerTile);
 
         console.log("cc.view = ", this.visibleSize, "canvasSize = ", this.canvasSize);
 
         // 初始化相机位置
         this.nodeMainCamera.setPosition(this.player.node.getPosition());
 
-        // 注册全局系统事件
-        // cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        // cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
-
         // 注册结点系统事件
         this.nodeMainCamera.on('position-changed', this.onPosCameraChanged, this);
-        // this.nodeMoveArea.on('touchmove', this.onTouchMove, this); //使用cc.Node.EventType.TOUCH_MOVE有bug
-        // this.nodeMoveArea.on('touchstart', this.onTouchStart, this);
-        // this.nodeMoveArea.on('touchend', this.onTouchEnd, this);
         this.backGround.node.on(cc.Node.EventType.TOUCH_START, this.onMouseDown, this);
     },
 
     onPosCameraChanged() {
         // 移动Move Area到相机的位置
         this.nodeMoveArea.setPosition(this.nodeMainCamera.getPosition());
-    },
-
-    onTouchEnd(event) {
-        console.log("--------onTouchEnd-------");
-        this.posTouchStart = undefined;
-    },
-
-    onTouchStart(event) {
-        console.log("--------onTouchStart-------");
-        this.posTouchStart = event.getLocation();
-        console.log("pos = ", this.posTouchStart);
-    },
-
-    onTouchMove(event) {
-        if (this.playerIsMoving || this.posTouchStart === undefined)
-            return;
-        console.log("----onTouchMove----");
-
-        // 如果移出了nodeMoveArea的范围，停止移动
-        let x = event.getLocationX(),
-            y = event.getLocationY();
-        console.log("(", x, ",", y, ")");
-        if (x <= 0 || y <= 0 || x > this.nodeMoveArea.width || y > this.nodeMoveArea.height) {
-            this.posTouchStart = undefined;
-            return;
-        }
-
-        let dx = x - this.posTouchStart.x,
-            dy = y - this.posTouchStart.y,
-            direction = this.getDirection(dx, dy);
-        console.log(direction);
-        this.playerMovingDirection = direction;
     },
 
     onMouseDown(event) {
@@ -117,93 +77,26 @@ cc.Class({
 
         // 获取鼠标坐标相对player坐标的向量(dx,dy）
         let dx = posMouse.x - pos.x, dy = posMouse.y - pos.y;
-        console.log("dx = ", dx, ",  dy = ", dy);
 
         // 将(dx,dy)换算到tiledMap的坐标系中，换算过程已拍照
         let tileSize = this.tiledMap.getTileSize(), w = tileSize.width, h = tileSize.height,
             dxTile = dx / w - dy / h, dyTile = -dx / w - dy / h;
-        console.log("dxTile = ", dxTile, ",  dyTile = ", dyTile);
 
         // 在playerTile上增加位移向量，得到newTile
         let newTile = cc.v2(Math.ceil(this.playerTile.x + dxTile), Math.ceil(this.playerTile.y + dyTile));
-        console.log("playerTile = ", this.playerTile, "  newTile = ", newTile);
+        console.log("playerTile = ", this.playerTile, "\nnewTile = ", newTile);
 
         // 开始移动（todo:通行判断、寻路算法）
         this.playerTile = newTile;
         this.playerIsMoving = true;
     },
 
-
-    onKeyDown(event) {
-        var direction_;
-        switch (event.keyCode) {
-            case cc.macro.KEY.up:
-                this.keyUpPressed = true; direction_ = "up";
-                if (this.keyLeftPressed) direction_ += "Left";
-                else if (this.keyRightPressed) direction_ += "Right";
-                break;
-            case cc.macro.KEY.down:
-                this.keyDownPressed = true; direction_ = "down";
-                if (this.keyLeftPressed) direction_ += "Left";
-                else if (this.keyRightPressed) direction_ += "Right";
-                break;
-            case cc.macro.KEY.left:
-                this.keyLeftPressed = true; direction_ = "left";
-                if (this.keyUpPressed) direction_ = direction_ + "Up";
-                else if (this.keyDownPressed) direction_ += "Down";
-                break;
-            case cc.macro.KEY.right:
-                this.keyRightPressed = true; direction_ = "right";
-                if (this.keyUpPressed) direction_ += "Up";
-                else if (this.keyDownPressed) direction_ += "Down";
-                break;
-            default:
-                return;
-        }
-        this.direction = direction_;
-        this.tryMoveByDirection();
-    },
-
-    onKeyUp: function (event) {
-        this.direction = "";
-        switch (event.keyCode) {
-            case cc.macro.KEY.up:
-                this.keyUpPressed = false;
-                break;
-            case cc.macro.KEY.down:
-                this.keyDownPressed = false;
-                break;
-            case cc.macro.KEY.left:
-                this.keyLeftPressed = false;
-                break;
-            case cc.macro.KEY.right:
-                this.keyRightPressed = false;
-                break;
-            default:
-                return;
-        }
-        /*
-        if(this.keyUpPressed)
-            this.direction = "up";
-        if(this.keyDownPressed)
-            this.direction = "down";
-        if(this.keyLeftPressed)
-            this.direction = "left";
-        if(this.keyRightPressed)
-            this.direction = "right";
-        this.tryMoveByDirection();
-        */
-    },
-
-
     // 尝试移动player朝某个方向
-    tryMoveByDirection(_direction) {
+    tryMoveByDirection(direction) {
         if (this.playerIsMoving)
             return;
-        let direction = this.playerMovingDirection,
-            newTile = cc.v2(this.playerTile.x, this.playerTile.y);
-        if (_direction)
-            direction = _direction;
+        this.changePlayerDirection(direction);
+        let newTile = cc.v2(this.playerTile.x, this.playerTile.y);
         switch (direction) {
             case "up":
                 newTile.y -= 1; newTile.x -= 1; break;
@@ -224,23 +117,34 @@ cc.Class({
             default:
                 return;
         }
-        // console.log("newTile = ", newTile, "（Tile坐标）");
+        console.log("---- tryMove ", direction, " ----\nnewTile = ", newTile);
 
         // 判断newTile是否超出tileMap的范围
-        // var tilePos = this.getTilePosByTile(newTile);
-        // var mapSize = this.tiledMap.getMapSize();
-        // if (tilePos.x < 0 || tilePos.x >= mapSize.width) return;
-        // if (tilePos.y < 0 || tilePos.y >= mapSize.height) return;
+        let tilePos = this.convertPosTile2Map(newTile);
+        console.log("after convert, tilePos = ", tilePos);
+        if (tilePos.x < 0 || tilePos.x >= this.sizeMapTile.width) return;
+        if (tilePos.y < 0 || tilePos.y >= this.sizeMapTile.height) return;
 
         // 判断newTile对应的图块是否可通行
-        // var gid = this.tiledMap.getLayer('layer1').getTileGIDAt(tilePos);
-        // console.log("newTile GID = ", gid);
-        //if(gid >= 8 || gid == 5) //【表示图块无法通行】手动设置该条件
-        //    return;
+        var gid = this.tiledMap.getLayer('layer1').getTileGIDAt(tilePos);
+        console.log("newTile GID = ", gid);
+        if (gid >= 23) //【表示图块无法通行】gid=ID+1 故没有0
+            return;
 
         // 准备移动角色
         this.playerTile = newTile;
         this.playerIsMoving = true;
+    },
+
+    convertPosTile2Map(visibleTile) {
+        // 计算visibleTile相对于顶端tile的位移
+        let dx = visibleTile.x - this.posTileTop.x,
+            dy = visibleTile.y - this.posTileTop.y;
+        return cc.v2(dx, dy);
+    },
+
+    convertPosTile2Vis(mapTile) {
+        return cc.v2(mapTile.x + this.posTileTop.x, mapTile.y + this.posTileTop.y);
     },
 
     // 将屏幕坐标系中的坐标转换为Canvas坐标系中的坐标
@@ -251,6 +155,7 @@ cc.Class({
         return posCanvas;
     },
 
+    // 根据向量(dx,dy)判断方向
     getDirection(dx, dy) {
         let direction = '';
         if (dx === 0) {
@@ -285,9 +190,13 @@ cc.Class({
         return direction;
     },
 
-    // 转换为能用于layer.getTileXXX的Tile坐标
-    getTilePosByTile: function (tile) {
-        return cc.v2(tile.x, tile.y + 1); //【当tilemap的anchor为(0,0)时测试无误】
+    // 当tilemap的anchor为(0.5,0.5)时，计算最上端的tile的坐标
+    getPosTileTop: function () {
+        let sizeMap = this.tiledMap.getMapSize(),
+            x = (sizeMap.height - sizeMap.width) * 0.5,
+            y = sizeMap.height - 1 - x;
+        this.sizeMapTile = sizeMap;
+        return cc.v2(x, y);
     },
 
     /*
@@ -300,7 +209,6 @@ cc.Class({
         return cc.v2(x, y);
     },
     */
-
 
     // 改变player的贴图
     changeSpriteFrame: function (param) {
@@ -325,9 +233,13 @@ cc.Class({
         }
     },
 
-
-    start() { },
-
+    // 改变player朝向
+    changePlayerDirection(direction) {
+        if (direction.indexOf('eft') > 0)
+            this.player.node.scaleX = -1;
+        else if (direction.indexOf('ight') > 0)
+            this.player.node.scaleX = 1;
+    },
 
     update(dt) {
         // 移动player
@@ -361,7 +273,5 @@ cc.Class({
             posPlayer = this.player.node.getPosition();
             this.nodeMainCamera.setPosition(posPlayer);
         }
-        // else if (this.posTouchStart) // 若仍然有触摸，继续移动
-        //     this.tryMoveByDirection();
     },
 });

@@ -21,7 +21,7 @@ cc.Class({
         this.node.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
         this.node.on(cc.Node.EventType.TOUCH_MOVE, this.onTouchMove, this);
         this.node.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
-        this.fit();
+        this.node.y -= this.map.deltaH; //适应屏幕，将stick位置下移
     },
 
     start() { },
@@ -29,14 +29,6 @@ cc.Class({
     update(dt) {
         if (this.directionMoving)
             this.map.tryMoveByDirection(this.directionMoving);
-    },
-
-    // 适应屏幕，将stick放到合适的位置
-    fit() {
-        let hCanvas = this.map.canvasSize.height,
-            hVisible = this.map.visibleSize.height,
-            dy = (hVisible - hCanvas) * 0.5;
-        this.node.y -= dy;
     },
 
     onTouchMove(touch) {

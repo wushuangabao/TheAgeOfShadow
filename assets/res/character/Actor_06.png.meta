@@ -1,15 +1,15 @@
 {
   "ver": "2.2.0",
-  "uuid": "c8f0fb9a-a31c-45e9-9e3c-6e05bc5dd021",
+  "uuid": "b43860a2-e1b2-4350-b73c-50a1f19add1a",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
   "subMetas": {
-    "Actor_06[s6][m12]": {
+    "Actor_06": {
       "ver": "1.0.3",
-      "uuid": "208812cf-e6b5-4aab-966e-21361d6ec7f2",
-      "rawTextureUuid": "c8f0fb9a-a31c-45e9-9e3c-6e05bc5dd021",
+      "uuid": "5cfd6435-f373-46e5-a6e8-13705af385c0",
+      "rawTextureUuid": "b43860a2-e1b2-4350-b73c-50a1f19add1a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
@@ -22,9 +22,9 @@
       "rawWidth": 1620,
       "rawHeight": 450,
       "borderTop": 0,
-      "borderBottom": 325,
+      "borderBottom": 0,
       "borderLeft": 0,
-      "borderRight": 1530,
+      "borderRight": 0,
       "subMetas": {}
     }
   }

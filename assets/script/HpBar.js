@@ -16,26 +16,22 @@ cc.Class({
         this.wBar = this.node.width;
         this.hBar = this.node.height;
         this.node.getChildByName('bar').height = this.hBar;
-        this.node.getChildByName('label').x = this.wBar + 10;
-
-
         this.getComponent('cc.ProgressBar').totalLength = this.wBar
         this.label.fontSize = this.hBar;
         this.label.lineHeight = this.hBar;
-        this.refreshNum();
+        
     },
 
     start() {
-
+        this.refreshNum();
     },
 
-    setNumberNow: function (numberNow) {
-        this.numberNow = numberNow;
-
+    setNumberNow(_numberNow) {
+        this.numberNow = _numberNow;
     },
 
     refreshNum: function () {
         this.getComponent('cc.ProgressBar').progress = this.numberNow / this.numberMax;
-        this.label.string = this.numberNow.toString() + '/' + this.numberMax.toString();
+        this.label.string = this.numberNow.toString() + '/' + this.numberMax.toString() + ' ';
     }
 });
