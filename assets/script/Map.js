@@ -36,15 +36,18 @@ cc.Class({
 
 
     onLoad() {
+        console.log("====== canvas Map onLoad ======");
+
         // 初始化变量
-        this.direction = "";
         this.timeMoving = 0;
-        this.keyUpPressed = false;
-        this.keyDownPressed = false;
-        this.keyLeftPressed = false;
-        this.keyRightPressed = false;
+        this.posTouchStart = undefined;
+        // this.keyUpPressed = false;
+        // this.keyDownPressed = false;
+        // this.keyLeftPressed = false;
+        // this.keyRightPressed = false;
         this.player.spriteFrame = this.atlas.getSpriteFrame('run_1');
         this.nodeMainCamera = this.node.getChildByName('Main Camera');
+        this.nodeMoveArea = this.node.getChildByName('Move Area');
         this.visibleSize = cc.view.getVisibleSize();
         this.canvasSize = this.node.getComponent(cc.Canvas).designResolution;
 
@@ -54,43 +57,76 @@ cc.Class({
         this.nodeMainCamera.setPosition(this.player.node.getPosition());
 
         // 注册全局系统事件
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+        // cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        // cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
 
         // 注册结点系统事件
+        this.nodeMainCamera.on('position-changed', this.onPosCameraChanged, this);
+        // this.nodeMoveArea.on('touchmove', this.onTouchMove, this); //使用cc.Node.EventType.TOUCH_MOVE有bug
+        // this.nodeMoveArea.on('touchstart', this.onTouchStart, this);
+        // this.nodeMoveArea.on('touchend', this.onTouchEnd, this);
         this.backGround.node.on(cc.Node.EventType.TOUCH_START, this.onMouseDown, this);
-        this.backGround.node.on(cc.Node.EventType.TOUCH_END, this.onMouseDown, this);
-        this.backGround.node.on(cc.Node.EventType.TOUCH_MOVE, this.onMouseDown, this);
     },
 
+    onPosCameraChanged() {
+        // 移动Move Area到相机的位置
+        this.nodeMoveArea.setPosition(this.nodeMainCamera.getPosition());
+    },
+
+    onTouchEnd(event) {
+        console.log("--------onTouchEnd-------");
+        this.posTouchStart = undefined;
+    },
+
+    onTouchStart(event) {
+        console.log("--------onTouchStart-------");
+        this.posTouchStart = event.getLocation();
+        console.log("pos = ", this.posTouchStart);
+    },
+
+    onTouchMove(event) {
+        if (this.playerIsMoving || this.posTouchStart === undefined)
+            return;
+        console.log("----onTouchMove----");
+
+        // 如果移出了nodeMoveArea的范围，停止移动
+        let x = event.getLocationX(),
+            y = event.getLocationY();
+        console.log("(", x, ",", y, ")");
+        if (x <= 0 || y <= 0 || x > this.nodeMoveArea.width || y > this.nodeMoveArea.height) {
+            this.posTouchStart = undefined;
+            return;
+        }
+
+        let dx = x - this.posTouchStart.x,
+            dy = y - this.posTouchStart.y,
+            direction = this.getDirection(dx, dy);
+        console.log(direction);
+        this.playerMovingDirection = direction;
+    },
 
     onMouseDown(event) {
         console.log("--------onMouseDown-------");
 
-        let posMouse = event.getLocation(), //经测试为this.visibleSize内一点，原点位于左下
-            //canvasSize = this.canvasSize,
-            visibleSize = this.visibleSize,
-            posCamera = this.nodeMainCamera.getPosition();
-        console.log("posMouse = ", posMouse, "nodeMainCamera = ", posCamera);
-
-        // 换算鼠标坐标到canvas坐标系
-        posMouse = cc.v2(posMouse.x - visibleSize.width / 2.0 + posCamera.x, posMouse.y - visibleSize.height / 2.0 + this.nodeMainCamera.y);
-        console.log("after transformation, posMouse = ", posMouse);
+        let posMouse = event.getLocation(); //经测试为this.visibleSize内一点，原点位于左下(可称为屏幕坐标系)
+        posMouse = this.convertToCanvas(posMouse);
 
         // 获取player在canvas下的坐标
         let pos = this.tiledMap.getLayer('layer1').getPositionAt(this.playerTile); pos.y += this.deltaY;
-        console.log("player's pos should be pos = ", pos);
+        console.log("player's pos = ", pos);
 
         // 获取鼠标坐标相对player坐标的向量(dx,dy）
         let dx = posMouse.x - pos.x, dy = posMouse.y - pos.y;
+        console.log("dx = ", dx, ",  dy = ", dy);
 
         // 将(dx,dy)换算到tiledMap的坐标系中，换算过程已拍照
         let tileSize = this.tiledMap.getTileSize(), w = tileSize.width, h = tileSize.height,
             dxTile = dx / w - dy / h, dyTile = -dx / w - dy / h;
+        console.log("dxTile = ", dxTile, ",  dyTile = ", dyTile);
 
         // 在playerTile上增加位移向量，得到newTile
         let newTile = cc.v2(Math.ceil(this.playerTile.x + dxTile), Math.ceil(this.playerTile.y + dyTile));
-        console.log("newTile = ", newTile);
+        console.log("playerTile = ", this.playerTile, "  newTile = ", newTile);
 
         // 开始移动（todo:通行判断、寻路算法）
         this.playerTile = newTile;
@@ -161,12 +197,14 @@ cc.Class({
 
 
     // 尝试移动player朝某个方向
-    tryMoveByDirection: function () {
+    tryMoveByDirection(_direction) {
         if (this.playerIsMoving)
             return;
-
-        var newTile = cc.v2(this.playerTile.x, this.playerTile.y);
-        switch (this.direction) {
+        let direction = this.playerMovingDirection,
+            newTile = cc.v2(this.playerTile.x, this.playerTile.y);
+        if (_direction)
+            direction = _direction;
+        switch (direction) {
             case "up":
                 newTile.y -= 1; newTile.x -= 1; break;
             case "down":
@@ -186,23 +224,65 @@ cc.Class({
             default:
                 return;
         }
-        console.log("newTile = ", newTile, "（Tile坐标）");
+        // console.log("newTile = ", newTile, "（Tile坐标）");
 
         // 判断newTile是否超出tileMap的范围
-        var tilePos = this.getTilePosByTile(newTile);
-        var mapSize = this.tiledMap.getMapSize();
-        if (tilePos.x < 0 || tilePos.x >= mapSize.width) return;
-        if (tilePos.y < 0 || tilePos.y >= mapSize.height) return;
+        // var tilePos = this.getTilePosByTile(newTile);
+        // var mapSize = this.tiledMap.getMapSize();
+        // if (tilePos.x < 0 || tilePos.x >= mapSize.width) return;
+        // if (tilePos.y < 0 || tilePos.y >= mapSize.height) return;
 
         // 判断newTile对应的图块是否可通行
-        var gid = this.tiledMap.getLayer('layer1').getTileGIDAt(tilePos);
-        console.log("newTile GID = ", gid);
+        // var gid = this.tiledMap.getLayer('layer1').getTileGIDAt(tilePos);
+        // console.log("newTile GID = ", gid);
         //if(gid >= 8 || gid == 5) //【表示图块无法通行】手动设置该条件
         //    return;
 
         // 准备移动角色
         this.playerTile = newTile;
         this.playerIsMoving = true;
+    },
+
+    // 将屏幕坐标系中的坐标转换为Canvas坐标系中的坐标
+    convertToCanvas(posVisible) {
+        let visibleSize = this.visibleSize,
+            posCamera = this.nodeMainCamera.getPosition(),
+            posCanvas = cc.v2(posVisible.x - visibleSize.width / 2.0 + posCamera.x, posVisible.y - visibleSize.height / 2.0 + this.nodeMainCamera.y);
+        return posCanvas;
+    },
+
+    getDirection(dx, dy) {
+        let direction = '';
+        if (dx === 0) {
+            if (dy > 0)
+                direction = 'up';
+            else direction = 'down';
+        } else {
+            let tan = dy / dx;
+            if (tan > 2.414213562) {
+                if (dx > 0) direction = 'up';
+                else direction = 'down';
+            }
+            else if (tan < -2.414213562) {
+                if (dx > 0) direction = 'down';
+                else direction = 'up';
+            }
+            else if (dx > 0) {
+                direction = 'right';
+                if (tan > 0.414213562)
+                    direction += 'Up';
+                else if (tan < -0.414213562)
+                    direction += 'Down';
+            }
+            else if (dx < 0) {
+                direction = 'left';
+                if (tan > 0.414213562)
+                    direction += 'Down';
+                else if (tan < -0.414213562)
+                    direction += 'Up';
+            }
+        }
+        return direction;
     },
 
     // 转换为能用于layer.getTileXXX的Tile坐标
@@ -227,7 +307,7 @@ cc.Class({
         if (typeof (param) === "string")
             this.player.spriteFrame = this.atlas.getSpriteFrame(param);
         else if (param === undefined) {
-            var str = this.player.spriteFrame.name;
+            let str = this.player.spriteFrame.name;
             switch (str) {
                 case "run_1":
                     str = "run_2";
@@ -246,46 +326,42 @@ cc.Class({
     },
 
 
-    start() {
-
-    },
+    start() { },
 
 
-    update: function (dt) {
+    update(dt) {
         // 移动player
         if (this.playerIsMoving) {
-            // 计算距离（单位：像素）
-            var pos = this.tiledMap.getLayer('layer1').getPositionAt(this.playerTile); //获取playerTile（Tile坐标）的像素坐标
+            // 获取playerTile的像素坐标，作为移动的终点
+            let pos = this.tiledMap.getLayer('layer1').getPositionAt(this.playerTile);
             pos.y += this.deltaY;
-            //console.log("update...playerTile = ",this.playerTile,"（Tile坐标）");
-            var posPlayer = this.player.node.getPosition();
-            var dx = pos.x - posPlayer.x, dy = pos.y - posPlayer.y;
-            var distance = Math.sqrt(dx * dx + dy * dy);
-
-            var distance_dt = this.speed * dt * 100;
+            let posPlayer = this.player.node.getPosition(),
+                dx = pos.x - posPlayer.x, dy = pos.y - posPlayer.y,
+                distance = Math.sqrt(dx * dx + dy * dy), //距离（单位：像素）
+                distance_dt = this.speed * dt * 100;
             if (distance <= distance_dt) {
                 // 到达playerTile指定的位置pos
                 this.player.node.setPosition(pos.x, pos.y);
-                //// 设置player的spriteFrame
-                //this.changeSpriteFrame("run_1");
                 // 关闭移动
                 this.playerIsMoving = false;
             }
             else {
                 // 移动，距离为distance_dt
-                var p = distance_dt / distance; this.player.node.x += p * dx; this.player.node.y += p * dy;
+                let p = distance_dt / distance; this.player.node.x += p * dx; this.player.node.y += p * dy;
                 // 计时器增加
                 this.timeMoving += dt;
                 if (this.timeMoving > this.timeForOneFrame) {
                     // 设置player的spriteFrame
                     this.changeSpriteFrame();
-                    // 清零计时器
+                    // 计时器清零
                     this.timeMoving = 0;
                 }
-
             }
             // 移动相机
-            posPlayer = this.player.node.getPosition(); this.nodeMainCamera.setPosition(posPlayer);
+            posPlayer = this.player.node.getPosition();
+            this.nodeMainCamera.setPosition(posPlayer);
         }
+        // else if (this.posTouchStart) // 若仍然有触摸，继续移动
+        //     this.tryMoveByDirection();
     },
 });

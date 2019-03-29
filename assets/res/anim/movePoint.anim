@@ -1,0 +1,55 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "movePoint",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.3,
+  "sample": 60,
+  "speed": 0.5,
+  "wrapMode": 1,
+  "curveData": {
+    "props": {
+      "position": [
+        {
+          "frame": 0,
+          "value": [
+            0,
+            27
+          ],
+          "curve": [
+            0.010743801652892626,
+            0.6357438016528926,
+            0.5915289256198347,
+            0.9376033057851239
+          ]
+        },
+        {
+          "frame": 0.15,
+          "value": [
+            0,
+            6
+          ]
+        },
+        {
+          "frame": 0.3,
+          "value": [
+            0,
+            16
+          ]
+        }
+      ]
+    }
+  },
+  "events": [
+    {
+      "frame": 0,
+      "func": "",
+      "params": []
+    },
+    {
+      "frame": 0.15,
+      "func": "",
+      "params": []
+    }
+  ]
+}
