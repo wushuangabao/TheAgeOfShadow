@@ -40,6 +40,7 @@ cc.Class({
 
         // 初始化变量
         this.timeMoving = 0;
+        this.playerTryingMove = this.playerIsMoving; //用于判断是否播放角色跑动的动画
         this.posTouchStart = undefined;
         this.player.spriteFrame = this.atlas.getSpriteFrame('run_1');
         this.nodeMainCamera = this.node.getChildByName('Main Camera');
@@ -57,7 +58,7 @@ cc.Class({
 
         // 注册结点系统事件
         this.nodeMainCamera.on('position-changed', this.onPosCameraChanged, this);
-        this.backGround.node.on(cc.Node.EventType.TOUCH_START, this.onMouseDown, this);
+        //this.backGround.node.on(cc.Node.EventType.TOUCH_START, this.onMouseDown, this);
     },
 
     onPosCameraChanged() {
@@ -65,6 +66,7 @@ cc.Class({
         this.nodeMoveArea.setPosition(this.nodeMainCamera.getPosition());
     },
 
+    // 注意：此方法关闭，玩家只能靠方向来移动，避免写寻路、通行判断
     onMouseDown(event) {
         console.log("--------onMouseDown-------");
 
@@ -96,6 +98,7 @@ cc.Class({
         if (this.playerIsMoving)
             return;
         this.changePlayerDirection(direction);
+        this.playerTryingMove = true;
         let newTile = cc.v2(this.playerTile.x, this.playerTile.y);
         switch (direction) {
             case "up":
@@ -117,17 +120,17 @@ cc.Class({
             default:
                 return;
         }
-        console.log("---- tryMove ", direction, " ----\nnewTile = ", newTile);
+        //console.log("---- tryMove ", direction, " ----\nnewTile = ", newTile);
 
         // 判断newTile是否超出tileMap的范围
         let tilePos = this.convertPosTile2Map(newTile);
-        console.log("after convert, tilePos = ", tilePos);
+        //console.log("after convert, tilePos = ", tilePos);
         if (tilePos.x < 0 || tilePos.x >= this.sizeMapTile.width) return;
         if (tilePos.y < 0 || tilePos.y >= this.sizeMapTile.height) return;
 
         // 判断newTile对应的图块是否可通行
         var gid = this.tiledMap.getLayer('layer1').getTileGIDAt(tilePos);
-        console.log("newTile GID = ", gid);
+        //console.log("newTile GID = ", gid);
         if (gid >= 23) //【表示图块无法通行】gid=ID+1 故没有0
             return;
 
@@ -210,6 +213,16 @@ cc.Class({
     },
     */
 
+    showPlayerMovingAction(dt) {
+        this.timeMoving += dt;
+        if (this.timeMoving > this.timeForOneFrame) {
+            // 设置player的spriteFrame
+            this.changeSpriteFrame();
+            // 计时器清零
+            this.timeMoving = 0;
+        }
+    },
+
     // 改变player的贴图
     changeSpriteFrame: function (param) {
         if (typeof (param) === "string")
@@ -242,6 +255,9 @@ cc.Class({
     },
 
     update(dt) {
+        // 播放player移动的动画
+        if (this.playerTryingMove)
+            this.showPlayerMovingAction(dt);
         // 移动player
         if (this.playerIsMoving) {
             // 获取playerTile的像素坐标，作为移动的终点
@@ -256,22 +272,15 @@ cc.Class({
                 this.player.node.setPosition(pos.x, pos.y);
                 // 关闭移动
                 this.playerIsMoving = false;
+                this.playerTryingMove = false;
             }
             else {
                 // 移动，距离为distance_dt
                 let p = distance_dt / distance; this.player.node.x += p * dx; this.player.node.y += p * dy;
-                // 计时器增加
-                this.timeMoving += dt;
-                if (this.timeMoving > this.timeForOneFrame) {
-                    // 设置player的spriteFrame
-                    this.changeSpriteFrame();
-                    // 计时器清零
-                    this.timeMoving = 0;
-                }
             }
             // 移动相机
-            posPlayer = this.player.node.getPosition();
-            this.nodeMainCamera.setPosition(posPlayer);
+            this.nodeMainCamera.setPosition(this.player.node.getPosition());
         }
-    },
+
+    }
 });

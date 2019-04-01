@@ -37,6 +37,7 @@ cc.Class({
 
     onTouchEnd(touch) {
         this.directionMoving = '';
+        this.map.playerTryingMove = false;
     },
 
     onTouchStart(event) {
@@ -50,7 +51,7 @@ cc.Class({
 
         let dx = x - centerX, dy = y - centerY,
             dToCenter = Math.sqrt(dx * dx + dy * dy);
-        if (dToCenter < this.dToCenterMin || dToCenter > this.radis) this.directionMoving = '';
+        if (dToCenter < this.dToCenterMin || dToCenter > this.radis) { this.directionMoving = ''; this.map.playerTryingMove = false; }
         else this.directionMoving = this.map.getDirection(dx, dy);
     },
 });
