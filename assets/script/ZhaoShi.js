@@ -1,4 +1,4 @@
-var Skill = require("Skill");
+const Skill = require("Skill");
 /*---------战斗中使用的招式----------
     效果：对技能作用的描述
     //类型：进攻 或 防守
@@ -21,12 +21,12 @@ var ZhaoShi = cc.Class({
         },
         nuCost: {
             default: 0,
-            tooltip: "0-10",
+            range:[0,10,1],
             type: cc.Integer
         },
         nuGain: {
             default: 0,
-            tooltip: "0-3",
+            range:[0,3],
             type: cc.Integer
         },
         atkExtra: {

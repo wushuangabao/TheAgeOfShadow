@@ -1,6 +1,6 @@
-var Skill = require("Skill"),
-    ZhaoShi = require("ZhaoShi"),
-    Actor = cc.Class({
+const Skill = require("Skill"),
+    ZhaoShi = require("ZhaoShi");
+var Actor = cc.Class({
         extends: cc.Component,
         /*
         1.Hp生命值：1-999。降至0，人物死亡。战斗中不能吃药，平时可以靠吃补品和药物恢复Hp。

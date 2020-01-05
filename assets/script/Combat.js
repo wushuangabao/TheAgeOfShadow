@@ -1,4 +1,4 @@
-var Config = require("Config").combat,
+const Config = require("Config").combat,
     Actor = require("Actor"),
     ZhaoShi = require("ZhaoShi");
 /*===========PVE战斗方法==============
@@ -33,19 +33,95 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        a: {
-            default: null,
-            type: Actor
+        aGroup: {
+            default: [],
+            type: [Actor]
         },
-        b: {
-            default: null,
-            type: Actor
+        bGroup: {
+            default: [],
+            type: [Actor]
         },
+        roundMax: {
+            default: 100,
+            tooltip: "超过最大回合数自动结束战斗",
+            type: cc.Integer
+        }
     },
 
     onLoad() {
-        this.a._atk = this.a.atk; this.a._def = this.a.def;
-        this.b._atk = this.b.atk; this.b._def = this.b.def;
+        this.round = 0;
+        this.numOpacity = this.node.opacity;
+        this.sizeVisible=cc.view.getVisibleSize();
+        this.node.width = this.sizeVisible.width;
+        this.node.height = this.sizeVisible.height;
+        this.node.opacity = 0;
+        console.log("====== combat onLoad =======", this);
+        this.startBattle(); //用于测试
+    },
+
+    update(dt) {
+        // 正在进行战斗
+        if (this.round > 0) {
+            if (this.alive(this.aGroup) && this.alive(this.bGroup) && this.round <= this.roundMax) {
+                // 回合处理
+                this.roundEvent();
+                this.round++;
+            } else {
+                // 结束战斗
+                this.round = 0;
+                this.node.opacity = 0;
+            }
+        }
+    },
+
+    // 开始战斗
+    startBattle(aGroup, bGroup) {
+        let aG = this.aGroup, bG = this.bGroup; //注意js中非基本数据类型都是引用传递的
+        if (arguments.length == 2) {
+            if (aGroup instanceof Array) aG = aGroup;
+            if (bGroup instanceof Array) bG = bGroup;
+        }
+        else if (arguments.length == 1)
+            console.log("Combat.start()输入的参数不能只有1个！");
+        // 判断参数是否正确
+        if (aG[0].constructor != Actor && bG[0].constructor != Actor) {
+            console.log("Combat.start()的角色组aG、bG赋值错误！");
+            return;
+        }
+        // 设置精灵半透明度
+        this.node.opacity = this.numOpacity;
+        // 初始化战斗参数
+        this.initializeAll(aG, bG);
+        // 进入回合1
+        this.round = 1;
+    },
+
+    // 一个回合
+    roundEvent() {
+        console.log("---第", this.round, "回合：---\n");
+    },
+
+    initializeAll(aG, bG) {
+        this.initializeG(aG);
+        this.initializeG(bG);
+        console.log("-----initialize a combat: ", this);
+    },
+
+    initializeG(g) {
+        let l = g.length;
+        for (let i = 0; i < l; i++) {
+            let a = g[i]; a._atk_ = a.atk; a._def_ = a.def;
+        }
+    },
+
+    // 判断队伍是否存活
+    alive(g) {
+        let l = g.length;
+        for (let i = 0; i < l; i++)
+            if (g[i].hp <= 0) {
+                return false;
+            }
+        return true;
     },
 
     /*  BaoJi: 暴击率
@@ -55,8 +131,8 @@ cc.Class({
         DShan: 防守状态闪避率,
         SFan: 防守状态触发闪避后的反击率,
         GFan: 防守状态格挡后的反击率,     */
-    refreshConfigs() {
-        let VA = this.valueA(), VB = 1 - VA,
+    refreshConfigs(a, b) {
+        let VA = this.valueA(a, b),
             V_Up = VA + 0.5, V_Down = 1.5 - VA,
             cfgA = {
                 BaoJi: Config.BaoJi * V_Up,
@@ -68,24 +144,24 @@ cc.Class({
                 GFan: Config.GFan * V_Up
             },
             cfgB = {
-                BaoJi: Config.BaoJi * V_Up,
-                AGe: Config.AGe * V_Down,
-                AShan: Config.AShan * V_Down,
-                PoFang: Config.PoFang * V_Up,
-                DShan: Config.DShan * V_Up,
-                SFan: Config.SFan * V_Up,
-                GFan: Config.GFan * V_Up
+                BaoJi: Config.BaoJi * V_Down,
+                AGe: Config.AGe * V_Up,
+                AShan: Config.AShan * V_Up,
+                PoFang: Config.PoFang * V_Down,
+                DShan: Config.DShan * V_Down,
+                SFan: Config.SFan * V_Down,
+                GFan: Config.GFan * V_Down
             };
         this.configA = cfgA; this.configB = cfgB;
     },
 
-    valueA() {
-        let A = this.v(this.a), B = this.v(this.b);
+    valueA(a, b) {
+        let A = this.v(a), B = this.v(b);
         return A / (A + B);
     },
 
     v(a) {
-        return (1 + a.nu * 0.1) * (a._atk + a._def + a.hpMax / Config.T + a.mp);
+        return (1 + a.nu * 0.1) * (a._atk_ + a._def_ + a.hpMax / Config.T + a.mp);
     },
 
     // 获取指定范围内的随机数（闭区间）
