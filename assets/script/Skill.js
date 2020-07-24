@@ -5,45 +5,48 @@
     //战斗中每回合回复的Hp
     //战斗中每回合回复的内力
     //其他特效
-    
-    ----------招式（Skill的子类ZhaoShi）----------
-    效果：“每提升一层境界，增加a攻击力和b防御力”。
-    a：
-    b：a和b最好都围绕T*x设定。
-    类型：空手。（目前先不设置持武器的招式，故只此一种类型）
-    招式可于战斗中主动使用。
 */
 var Skill = cc.Class({
     extends: cc.Component,
 
     properties: {
         skill_name: {
-            default: "",
+            default: ""
         },
         lv: {
             default: 1,
-            type: cc.Integer
+            type: cc.Integer,
+            displayName: "初始等级"
+        },
+        lv_max:{
+            default: 10,
+            type: cc.Integer,
+            displayName: "等级上限"
         },
         type: {
             default: "内功",
-            tooltip: "功法分为内功和招式",
+            visible: false
         },
         info: {
-            default:"这是对功法的介绍。",
+            default:"",
+            displayName: "说明文字（功法描述）"
         },
         exp_fix: {
             default: 10,
+            displayName: "升级所需经验de系数",
             tooltip: "等级为lv时累积获得的经验为 lv^3*exp_fix",
             type: cc.Integer
         },
-        gain: {
+        gain_attr: {
             default: [],
-            tooltip: "每级给人物增加的hp、mp、atk、def属性",
+            displayName: "每级提升人物属性",
+            tooltip: "每级给人物增加的hp、mp、atk、def属性（数组必须有4个值）",
             type: [cc.Float]
         },
     },
 
-    onLoad() {
+    // 构造函数
+    ctor() {
         this.setLv(this.lv);
     },
 
@@ -52,8 +55,14 @@ var Skill = cc.Class({
         this.exp += dE;
         // 升级
         if (exp >= this.expNextLv) {
-            this.lv++;
-            this.expNextLv = this.expOfLv(this.lv + 1);
+            if(this.lv < this.lv_max) {
+                this.lv++;
+                this.expNextLv = this.expOfLv(this.lv + 1);
+                console.log(this,type + " - " + this.skill_name + "的等级上升到了 " + this.lv + " 级！"); 
+            }
+            else{
+                console.log(this,type + " - " + this.skill_name + "的等级已到达上限，无法升级!");
+            }
         }
     },
 
