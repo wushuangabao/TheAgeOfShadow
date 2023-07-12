@@ -1,13 +1,18 @@
 {
-  "ver": "2.2.0",
+  "ver": "2.3.5",
   "uuid": "b43860a2-e1b2-4350-b73c-50a1f19add1a",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 1620,
+  "height": 450,
+  "platformSettings": {},
   "subMetas": {
     "Actor_06": {
-      "ver": "1.0.3",
+      "ver": "1.0.4",
       "uuid": "5cfd6435-f373-46e5-a6e8-13705af385c0",
       "rawTextureUuid": "b43860a2-e1b2-4350-b73c-50a1f19add1a",
       "trimType": "auto",

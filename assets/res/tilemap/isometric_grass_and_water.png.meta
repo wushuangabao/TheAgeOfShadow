@@ -1,13 +1,18 @@
 {
-  "ver": "2.2.0",
+  "ver": "2.3.5",
   "uuid": "753c8b0f-67b5-4d8a-921c-c88326cd25c3",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 256,
+  "height": 384,
+  "platformSettings": {},
   "subMetas": {
     "isometric_grass_and_water": {
-      "ver": "1.0.3",
+      "ver": "1.0.4",
       "uuid": "27de9f2f-39c7-4ad6-92fe-a8fc05423b6b",
       "rawTextureUuid": "753c8b0f-67b5-4d8a-921c-c88326cd25c3",
       "trimType": "auto",
